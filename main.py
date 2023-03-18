@@ -1,20 +1,20 @@
 import RapidQuadrocopterTrajectories.Python.quadrocoptertrajectory as quadtraj
 
 # Define the trajectory starting state:
-pos0 = [0, 0, 8] #position
+pos0 = [0, 0, 30] #position
 vel0 = [0, 0, 0] #velocity
 acc0 = [0, 0, 0] #acceleration
 
 # Define the goal state:
-posf = [0, 0, 4]  # position
-velf = [0, 0, 4]  # velocity
-accf = [0, 4, 0]  # acceleration
+posf = [0, 0, 20]  # position
+velf = [0, 0, -10]  # velocity
+accf = [0, -10, 0]  # acceleration
 
 # Define the duration:
-Tf = 3
+Tf = 2
 
 # Define the input limits:
-fmin = 5  #[m/s**2]
+fmin = 0  #[m/s**2]
 fmax = 25 #[m/s**2]
 wmax = 20 #[rad/s]
 minTimeSec = 0.02 #[s]
