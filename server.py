@@ -27,7 +27,8 @@ def query(message):
     return {
         'message_type': 'query_response',
         # reparameterize by arc length instead?
-        'position': tuple(trajectory.get_position(time))
+        'position': tuple(trajectory.get_position(time)),
+        'normal': tuple(trajectory.get_normal_vector(time))
     }
 
 def handle_request(request):
