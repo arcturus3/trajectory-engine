@@ -1,18 +1,17 @@
 import zmq
-import RapidQuadrocopterTrajectories.Python.quadrocoptertrajectory as quadtraj
-import trajectory
+import numpy as np
+from trajectory import Trajectory, Constraint
 
 def generate(message):
+    segment_duration = 5
     waypoints = message['waypoints']
-    trajectory = trajectory.generate(
-        5,
-        waypoints[0]['position'],
-        (0, 0, 0),
-        (0, 0, 0),
-        waypoints[1]['position'],
-        (0, 0, 5),
-        None
-    )
+    constraints = []
+    for i, waypoint in enumerate(waypoints):
+        position = np.array(waypoint['position'])
+        time = segment_duration * i
+        constraint = Constraint(position, time)
+        constraints.append(constraint)
+    trajectory = Trajectory(constraints)
     trajectory_id = len(trajectories)
     trajectories.append(trajectory)
     return {
@@ -28,7 +27,7 @@ def query(message):
         'message_type': 'query_response',
         # reparameterize by arc length instead?
         'position': tuple(trajectory.get_position(time)),
-        'normal': tuple(trajectory.get_normal_vector(time))
+        'normal': tuple(trajectory.get_normal(time))
     }
 
 def handle_request(request):
@@ -40,7 +39,7 @@ def handle_request(request):
     response = handlers[message_type](request)
     return response
 
-trajectories: list[quadtraj.RapidTrajectory] = []
+trajectories: list[Trajectory] = []
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
