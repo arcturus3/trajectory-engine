@@ -1,10 +1,10 @@
 import zmq
 import RapidQuadrocopterTrajectories.Python.quadrocoptertrajectory as quadtraj
-import generator
+import trajectory
 
 def generate(message):
     waypoints = message['waypoints']
-    trajectory = generator.generate(
+    trajectory = trajectory.generate(
         5,
         waypoints[0]['position'],
         (0, 0, 0),
