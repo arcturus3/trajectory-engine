@@ -1,14 +1,14 @@
 import zmq
 import numpy as np
+import traceback
 from trajectory import Trajectory, Constraint
 
 def generate(message):
-    segment_duration = 5
     waypoints = message['waypoints']
     constraints = []
-    for i, waypoint in enumerate(waypoints):
+    for waypoint in waypoints:
         position = np.array(waypoint['position'])
-        time = segment_duration * i
+        time = waypoint['time']
         constraint = Constraint(position, time)
         constraints.append(constraint)
     trajectory = Trajectory(constraints)
@@ -36,7 +36,13 @@ def handle_request(request):
         'query_request': query
     }
     message_type = request['message_type']
-    response = handlers[message_type](request)
+    try:
+        response = handlers[message_type](request)
+    except Exception:
+        print(traceback.format_exc())
+        response = {
+            'error': 'responding to prevent blocking'
+        }
     return response
 
 trajectories: list[Trajectory] = []

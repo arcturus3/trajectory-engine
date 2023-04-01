@@ -30,6 +30,9 @@ class Trajectory:
             duration = self.constraints[i].time - self.constraints[i - 1].time
             segment = self.generate_segment(p0, v0, a0, p1, v1, a1, duration)
             self.segments.append(segment)
+            p0 = segment.get_position(duration)
+            v0 = segment.get_velocity(duration)
+            a0 = segment.get_acceleration(duration)
 
     def generate_segment(
         self,
@@ -51,6 +54,8 @@ class Trajectory:
     def get_segment_time(self, time: float):
         i = len(self.constraints) - 1 # initial segment constraint index
         while time < self.constraints[i].time:
+            i -= 1
+        if i == len(self.constraints) - 1:
             i -= 1
         segment = self.segments[i]
         segment_time = time - self.constraints[i].time
