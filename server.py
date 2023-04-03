@@ -12,12 +12,13 @@ def generate(message):
         constraint = Constraint(position, time)
         constraints.append(constraint)
     trajectory = Trajectory(constraints)
-    trajectory.generate_greedy()
+    feasible = trajectory.generate_greedy()
     trajectory_id = len(trajectories)
     trajectories.append(trajectory)
     return {
         'message_type': 'generate_response',
-        'trajectory_id': trajectory_id
+        'trajectory_id': trajectory_id,
+        'feasible': feasible
     }
 
 def query(message):
