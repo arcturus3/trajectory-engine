@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial.transform import Rotation
 from RapidQuadrocopterTrajectories.Python.quadrocoptertrajectory import RapidTrajectory as TrajectorySegment
 
 class Constraint:
@@ -18,7 +19,7 @@ class Trajectory:
         self.min_time_interval = 0.01
         self.generate()
 
-    def generate(self):
+    def generate_old(self):
         self.segments: list[TrajectorySegment] = []
         p0 = self.constraints[0].position
         v0 = np.zeros(3)
@@ -29,6 +30,60 @@ class Trajectory:
             a1 = np.array([None, None, None])
             duration = self.constraints[i].time - self.constraints[i - 1].time
             segment = self.generate_segment(p0, v0, a0, p1, v1, a1, duration)
+            self.segments.append(segment)
+            p0 = segment.get_position(duration)
+            v0 = segment.get_velocity(duration)
+            a0 = segment.get_acceleration(duration)
+
+    def normalize(self, v: np.ndarray):
+        return v / np.linalg.norm(v)
+
+    # direction set to optimize over
+    # consider sampling directions in 3D
+    def get_directions(self, p0: np.ndarray, p1: np.ndarray, p2: np.ndarray):
+        a = self.normalize(p1 - p0)
+        b = self.normalize(p2 - p1)
+        axis = self.normalize(np.cross(a, b))
+        angles = np.linspace(0, 2 * np.pi, 100, endpoint=False)
+        directions = []
+        for angle in angles:
+            rotation = Rotation.from_rotvec(angle * axis)
+            directions.append(rotation.apply(a))
+        return np.array(directions)
+
+    # speed set to optimize over
+    def get_speeds(self):
+        return np.linspace(0, 50, 100)
+
+    # can still optimize over time (instead of user provided)
+    def generate(self):
+        self.segments: list[TrajectorySegment] = []
+        p0 = self.constraints[0].position
+        v0 = np.zeros(3)
+        a0 = np.zeros(3)
+        for i in range(1, len(self.constraints)):
+            p1 = self.constraints[i].position
+            a1 = np.array([None, None, None])
+            duration = self.constraints[i].time - self.constraints[i - 1].time
+            if i < len(self.constraints) - 1:
+                p2 = self.constraints[i + 1].position
+                v2 = np.array([None, None, None])
+                a2 = np.array([None, None, None])
+                best_segment = None
+                best_cost = float('inf')
+                for direction in self.get_directions(p0, p1, p2):
+                    for speed in self.get_speeds():
+                        v1 = speed * direction
+                        segment = self.generate_segment(p0, v0, a0, p1, v1, a1, duration)
+                        induced_segment = self.generate_segment(p1, v1, a1, p2, v2, a2, duration)
+                        cost = segment.get_cost() + induced_segment.get_cost()
+                        if cost < best_cost:
+                            best_segment = segment
+                            best_cost = cost
+                segment = best_segment
+            else:
+                v1 = np.zeros(3)
+                segment = self.generate_segment(p0, v0, a0, p1, v1, a1, duration)
             self.segments.append(segment)
             p0 = segment.get_position(duration)
             v0 = segment.get_velocity(duration)
