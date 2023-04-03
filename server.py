@@ -12,6 +12,7 @@ def generate(message):
         constraint = Constraint(position, time)
         constraints.append(constraint)
     trajectory = Trajectory(constraints)
+    trajectory.generate_greedy()
     trajectory_id = len(trajectories)
     trajectories.append(trajectory)
     return {

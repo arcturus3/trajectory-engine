@@ -17,10 +17,10 @@ class Trajectory:
         self.ground_point = np.zeros(3)
         self.ground_normal = np.array([0, 0, 1])
         self.min_time_interval = 0.01
-        self.generate()
-
-    def generate_old(self):
         self.segments: list[TrajectorySegment] = []
+
+    # generate segments with unconstrained final states
+    def generate_naive(self):
         p0 = self.constraints[0].position
         v0 = np.zeros(3)
         a0 = np.zeros(3)
@@ -35,29 +35,8 @@ class Trajectory:
             v0 = segment.get_velocity(duration)
             a0 = segment.get_acceleration(duration)
 
-    def normalize(self, v: np.ndarray):
-        return v / np.linalg.norm(v)
-
-    # direction set to optimize over
-    # consider sampling directions in 3D
-    def get_directions(self, p0: np.ndarray, p1: np.ndarray, p2: np.ndarray):
-        a = self.normalize(p1 - p0)
-        b = self.normalize(p2 - p1)
-        axis = self.normalize(np.cross(a, b))
-        angles = np.linspace(0, 2 * np.pi, 100, endpoint=False)
-        directions = []
-        for angle in angles:
-            rotation = Rotation.from_rotvec(angle * axis)
-            directions.append(rotation.apply(a))
-        return np.array(directions)
-
-    # speed set to optimize over
-    def get_speeds(self):
-        return np.linspace(0, 50, 100)
-
-    # can still optimize over time (instead of user provided)
-    def generate(self):
-        self.segments: list[TrajectorySegment] = []
+    # generate segments with search over final states to minimize cost of current and next segment
+    def generate_greedy(self):
         p0 = self.constraints[0].position
         v0 = np.zeros(3)
         a0 = np.zeros(3)
@@ -66,23 +45,19 @@ class Trajectory:
             a1 = np.array([None, None, None])
             duration = self.constraints[i].time - self.constraints[i - 1].time
             if i < len(self.constraints) - 1:
-                p2 = self.constraints[i + 1].position
-                v2 = np.array([None, None, None])
-                a2 = np.array([None, None, None])
+                p1_ind = self.constraints[i + 1].position
+                v1_ind = np.array([None, None, None])
+                a1_ind = np.array([None, None, None])
                 best_segment = None
                 best_cost = float('inf')
-                for direction in self.get_directions(p0, p1, p2):
+                for direction in self.get_directions(p0, p1, p1_ind):
                     for speed in self.get_speeds():
                         v1 = speed * direction
-
-                        # debug_labels = ['p0', 'v0', 'a0', 'p1', 'v1', 'a1', 'p2', 'v2', 'a2']
-                        # debug_values = [p0, v0, a0, p1, v1, a1, p2, v2, a2]
-                        # for x in zip(debug_labels, debug_values):
-                        #     print(*x)
-
                         segment = self.generate_segment(p0, v0, a0, p1, v1, a1, duration)
-                        a1_induced = segment.get_acceleration(duration)
-                        induced_segment = self.generate_segment(p1, v1, a1_induced, p2, v2, a2, duration)
+                        p0_ind = segment.get_position(duration)
+                        v0_ind = segment.get_velocity(duration)
+                        a0_ind = segment.get_acceleration(duration)
+                        induced_segment = self.generate_segment(p0_ind, v0_ind, a0_ind, p1_ind, v1_ind, a1_ind, duration)
                         cost = segment.get_cost() + induced_segment.get_cost()
                         if cost < best_cost:
                             best_segment = segment
@@ -112,6 +87,25 @@ class Trajectory:
         segment.set_goal_acceleration(a1)
         segment.generate(duration)
         return segment
+
+    def normalize(self, v: np.ndarray):
+        return v / np.linalg.norm(v)
+
+    # direction set to optimize over
+    def get_directions(self, p0: np.ndarray, p1: np.ndarray, p2: np.ndarray):
+        a = self.normalize(p1 - p0)
+        b = self.normalize(p2 - p1)
+        axis = self.normalize(np.cross(a, b))
+        angles = np.linspace(0, 2 * np.pi, 100, endpoint=False)
+        directions = []
+        for angle in angles:
+            rotation = Rotation.from_rotvec(angle * axis)
+            directions.append(rotation.apply(a))
+        return np.array(directions)
+
+    # speed set to optimize over
+    def get_speeds(self):
+        return np.linspace(0, 50, 100)
 
     def get_segment_time(self, time: float):
         i = len(self.constraints) - 1 # initial segment constraint index
