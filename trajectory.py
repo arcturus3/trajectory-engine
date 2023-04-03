@@ -74,8 +74,15 @@ class Trajectory:
                 for direction in self.get_directions(p0, p1, p2):
                     for speed in self.get_speeds():
                         v1 = speed * direction
+
+                        # debug_labels = ['p0', 'v0', 'a0', 'p1', 'v1', 'a1', 'p2', 'v2', 'a2']
+                        # debug_values = [p0, v0, a0, p1, v1, a1, p2, v2, a2]
+                        # for x in zip(debug_labels, debug_values):
+                        #     print(*x)
+
                         segment = self.generate_segment(p0, v0, a0, p1, v1, a1, duration)
-                        induced_segment = self.generate_segment(p1, v1, a1, p2, v2, a2, duration)
+                        a1_induced = segment.get_acceleration(duration)
+                        induced_segment = self.generate_segment(p1, v1, a1_induced, p2, v2, a2, duration)
                         cost = segment.get_cost() + induced_segment.get_cost()
                         if cost < best_cost:
                             best_segment = segment
