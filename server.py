@@ -8,11 +8,13 @@ def generate(message):
     constraints = []
     for waypoint in waypoints:
         position = np.array(waypoint['position'])
+        constrain_rotation = waypoint['constrain_rotation']
+        rotation = np.array(waypoint['rotation']) if constrain_rotation else None
         time = waypoint['time']
-        constraint = Constraint(position, time)
+        constraint = Constraint(position, rotation, time)
         constraints.append(constraint)
     trajectory = Trajectory(constraints)
-    feasible = trajectory.generate_greedy()
+    feasible = trajectory.generate_greedy_with_rotation()
     trajectory_id = len(trajectories)
     trajectories.append(trajectory)
     return {

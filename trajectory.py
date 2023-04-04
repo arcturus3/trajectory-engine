@@ -3,8 +3,9 @@ from scipy.spatial.transform import Rotation
 from RapidQuadrocopterTrajectories.Python.quadrocoptertrajectory import RapidTrajectory as TrajectorySegment, InputFeasibilityResult
 
 class Constraint:
-    def __init__(self, position: np.ndarray, time: float):
+    def __init__(self, position: np.ndarray, rotation: np.ndarray | None, time: float):
         self.position = position
+        self.rotation = rotation
         self.time = time
 
 class Trajectory:
@@ -27,8 +28,8 @@ class Trajectory:
         a0 = np.zeros(3)
         for i in range(1, len(self.constraints)):
             p1 = self.constraints[i].position
-            v1 = np.array([None, None, None])
-            a1 = np.array([None, None, None])
+            v1 = np.full(3, None)
+            a1 = np.full(3, None)
             duration = self.constraints[i].time - self.constraints[i - 1].time
             segment, feasible = self.generate_segment(p0, v0, a0, p1, v1, a1, duration)
             if not feasible:
@@ -48,12 +49,12 @@ class Trajectory:
         a0 = np.zeros(3)
         for i in range(1, len(self.constraints)):
             p1 = self.constraints[i].position
-            a1 = np.array([None, None, None])
+            a1 = np.full(3, None)
             duration = self.constraints[i].time - self.constraints[i - 1].time
             if i < len(self.constraints) - 1:
                 p1_ind = self.constraints[i + 1].position
-                v1_ind = np.array([None, None, None])
-                a1_ind = np.array([None, None, None])
+                v1_ind = np.full(3, None)
+                a1_ind = np.full(3, None)
                 best_segment = None
                 best_cost = float('inf')
                 for direction in self.get_directions(p0, p1, p1_ind):
@@ -69,6 +70,63 @@ class Trajectory:
                             if cost < best_cost:
                                 best_segment = segment
                                 best_cost = cost
+                segment = best_segment
+            else:
+                v1 = np.zeros(3)
+                segment, segment_feasible = self.generate_segment(p0, v0, a0, p1, v1, a1, duration)
+                if not segment_feasible:
+                    segment = None
+            if segment is None:
+                self.segments = []
+                return False
+            self.segments.append(segment)
+            p0 = segment.get_position(duration)
+            v0 = segment.get_velocity(duration)
+            a0 = segment.get_acceleration(duration)
+        return True
+
+    # rotation = normal
+    # rotation = thrust / ||thrust||
+    # rotation = undefined if thrust = 0
+    # acceleration = thrust + gravity
+    # acceleration = ||thrust|| * rotation + gravity
+
+    # convert euler angles to normal vector
+    # beware of coordinate system change
+    def generate_greedy_with_rotation(self) -> bool:
+        self.segments = []
+        p0 = self.constraints[0].position
+        v0 = np.zeros(3)
+        a0 = np.zeros(3) # either enforce initial and final accelerations to be 0 or allow rotation to take effect with minimum thrust here
+        for i in range(1, len(self.constraints)):
+            p1 = self.constraints[i].position
+            duration = self.constraints[i].time - self.constraints[i - 1].time
+            if i < len(self.constraints) - 1:
+                p1_ind = self.constraints[i + 1].position
+                v1_ind = np.full(3, None)
+                a1_ind = np.full(3, None)
+                best_segment = None
+                best_cost = float('inf')
+                for thrust in self.get_thrusts():
+                    if self.constraints[i].rotation is None:
+                        a1 = np.full(3, None) # wasteful to check all thrusts in this case
+                    else:
+                        rotation = Rotation.from_euler('yxz', self.constraints[i].rotation, True)
+                        normal = rotation.apply(np.array([0, 0, 1]))
+                        a1 = thrust * normal + self.gravity
+                    for direction in self.get_directions(p0, p1, p1_ind):
+                        for speed in self.get_speeds():
+                            v1 = speed * direction
+                            segment, segment_feasible = self.generate_segment(p0, v0, a0, p1, v1, a1, duration)
+                            p0_ind = segment.get_position(duration)
+                            v0_ind = segment.get_velocity(duration)
+                            a0_ind = segment.get_acceleration(duration)
+                            induced_segment, induced_segment_feasible = self.generate_segment(p0_ind, v0_ind, a0_ind, p1_ind, v1_ind, a1_ind, duration)
+                            if segment_feasible and induced_segment_feasible:
+                                cost = segment.get_cost() + induced_segment.get_cost()
+                                if cost < best_cost:
+                                    best_segment = segment
+                                    best_cost = cost
                 segment = best_segment
             else:
                 v1 = np.zeros(3)
@@ -106,12 +164,15 @@ class Trajectory:
     def normalize(self, v: np.ndarray):
         return v / np.linalg.norm(v)
 
+    def get_thrusts(self):
+        return np.linspace(self.f_min, self.f_max, 30)
+
     # direction set to optimize over
     def get_directions(self, p0: np.ndarray, p1: np.ndarray, p2: np.ndarray):
         a = self.normalize(p1 - p0)
         b = self.normalize(p2 - p1)
         axis = self.normalize(np.cross(a, b))
-        angles = np.linspace(0, 2 * np.pi, 100, endpoint=False)
+        angles = np.linspace(0, 2 * np.pi, 30, endpoint=False)
         directions = []
         for angle in angles:
             rotation = Rotation.from_rotvec(angle * axis)
@@ -120,7 +181,7 @@ class Trajectory:
 
     # speed set to optimize over
     def get_speeds(self):
-        return np.linspace(0, 50, 100)
+        return np.linspace(0, 50, 30)
 
     def get_segment_time(self, time: float):
         i = len(self.constraints) - 1 # initial segment constraint index
