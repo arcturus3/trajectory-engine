@@ -111,7 +111,7 @@ class Trajectory:
                     if self.constraints[i].rotation is None:
                         a1 = np.full(3, None) # wasteful to check all thrusts in this case
                     else:
-                        rotation = Rotation.from_euler('yxz', self.constraints[i].rotation, True)
+                        rotation = Rotation.from_matrix(self.constraints[i].rotation)
                         normal = rotation.apply(np.array([0, 0, 1]))
                         a1 = thrust * normal + self.gravity
                     for direction in self.get_directions(p0, p1, p1_ind):
