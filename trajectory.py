@@ -2,6 +2,11 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from RapidQuadrocopterTrajectories.Python.quadrocoptertrajectory import RapidTrajectory as TrajectorySegment, InputFeasibilityResult
 
+# minimize total acceleration
+# define constraint durations instead of times
+# optimize over durations instead of fixing user durations
+# interpolate between yaws at current final and next final constraints
+
 class Constraint:
     def __init__(self, position: np.ndarray, rotation: np.ndarray | None, time: float):
         self.position = position
@@ -12,7 +17,7 @@ class Trajectory:
     def __init__(self, constraints: list[Constraint]):
         self.constraints = constraints
         self.f_min = 0
-        self.f_max = 25
+        self.f_max = 35
         self.w_max = 20
         self.gravity = np.array([0, 0, -9.81])
         self.ground_point = np.zeros(3)
@@ -100,6 +105,7 @@ class Trajectory:
         a0 = np.zeros(3) # either enforce initial and final accelerations to be 0 or allow rotation to take effect with minimum thrust here
         for i in range(1, len(self.constraints)):
             p1 = self.constraints[i].position
+            a1 = np.full(3, None)
             duration = self.constraints[i].time - self.constraints[i - 1].time
             if i < len(self.constraints) - 1:
                 p1_ind = self.constraints[i + 1].position
@@ -108,9 +114,7 @@ class Trajectory:
                 best_segment = None
                 best_cost = float('inf')
                 for thrust in self.get_thrusts():
-                    if self.constraints[i].rotation is None:
-                        a1 = np.full(3, None) # wasteful to check all thrusts in this case
-                    else:
+                    if self.constraints[i].rotation is not None:
                         rotation = Rotation.from_matrix(self.constraints[i].rotation)
                         normal = rotation.apply(np.array([0, 0, 1]))
                         a1 = thrust * normal + self.gravity
@@ -121,7 +125,8 @@ class Trajectory:
                             p0_ind = segment.get_position(duration)
                             v0_ind = segment.get_velocity(duration)
                             a0_ind = segment.get_acceleration(duration)
-                            induced_segment, induced_segment_feasible = self.generate_segment(p0_ind, v0_ind, a0_ind, p1_ind, v1_ind, a1_ind, duration)
+                            duration_ind = self.constraints[i + 1].time - self.constraints[i].time
+                            induced_segment, induced_segment_feasible = self.generate_segment(p0_ind, v0_ind, a0_ind, p1_ind, v1_ind, a1_ind, duration_ind)
                             if segment_feasible and induced_segment_feasible:
                                 cost = segment.get_cost() + induced_segment.get_cost()
                                 if cost < best_cost:

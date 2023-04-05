@@ -50,13 +50,16 @@ def handle_request(request):
     return response
 
 trajectories: list[Trajectory] = []
+debug = False
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind('tcp://*:5555')
 while True:
     request = socket.recv_json()
-    print('received:', request)
+    if debug:
+        print('received:', request)
     response = handle_request(request)
     socket.send_json(response)
-    print('sent:', response)
+    if debug:
+        print('sent:', response)
