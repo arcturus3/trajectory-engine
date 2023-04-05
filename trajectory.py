@@ -170,6 +170,7 @@ class Trajectory:
         return v / np.linalg.norm(v)
 
     def get_thrusts(self):
+        # return max of this and some small epsilon to ensure that quad is thrusting some amount
         return np.linspace(self.f_min, self.f_max, 30)
 
     # direction set to optimize over
