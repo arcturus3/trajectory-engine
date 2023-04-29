@@ -14,7 +14,8 @@ def generate(message):
         constraint = Constraint(position, rotation, time)
         constraints.append(constraint)
     trajectory = Trajectory(constraints)
-    feasible = trajectory.generate_greedy_with_rotation()
+    feasible = trajectory.generate_naive()
+    # feasible = trajectory.generate_greedy_with_rotation()
     trajectory_id = len(trajectories)
     trajectories.append(trajectory)
     return {

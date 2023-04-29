@@ -178,7 +178,7 @@ class Trajectory:
         a = self.normalize(p1 - p0)
         b = self.normalize(p2 - p1)
         axis = self.normalize(np.cross(a, b))
-        angles = np.linspace(0, 2 * np.pi, 30, endpoint=False)
+        angles = np.linspace(0, 2 * np.pi, 25, endpoint=False)
         directions = []
         for angle in angles:
             rotation = Rotation.from_rotvec(angle * axis)
@@ -187,7 +187,7 @@ class Trajectory:
 
     # speed set to optimize over
     def get_speeds(self):
-        return np.linspace(0, 50, 30)
+        return np.linspace(0, 25, 50)
 
     def get_segment_time(self, time: float):
         i = len(self.constraints) - 1 # initial segment constraint index

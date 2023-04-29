@@ -1,0 +1,54 @@
+self.segments = []
+p0 = self.constraints[0].position
+v0 = np.zeros(3)
+a0 = np.zeros(3)
+for i in range(1, len(self.constraints)):
+    p1 = self.constraints[i].position
+    v1 = np.full(3, None)
+    a1 = np.full(3, None)
+    duration = self.constraints[i].time - self.constraints[i - 1].time
+    segment, feasible = self.generate_segment(p0, v0, a0, p1, v1, a1, duration)
+    if not feasible:
+        self.segments = []
+        return False
+    self.segments.append(segment)
+    p0 = segment.get_position(duration)
+    v0 = segment.get_velocity(duration)
+    a0 = segment.get_acceleration(duration)
+
+
+
+constraint:
+c_i = (x_i, R_i, t_i)
+is position, rotation, arrival time
+x_i \in R^3
+R_i \in SO(3) \cup {None}
+t_i \in R
+
+t_1 = 0
+
+constraint set
+C = {c_i} i = 1 to n
+
+trajectory segment/motion primitive:
+\tau(t): [t_a, t_b] -> R^3
+\tau(t) = (x(t), x'(t), x''(t), R(t))
+
+primitive generation:
+g: initial_state, final_state -> trajectory
+g((x_i, x'_i, x''_i), (x_f, x'_f, x''_f), )
+
+naive algorithm:
+
+input:
+C
+
+\tau_0(0) = (x_1, 0, 0, 0)
+for i = 1 to n:
+
+
+
+p_0 = (0, 0, 0)
+v_0 = (0, 0, 0)
+
+\tau()
