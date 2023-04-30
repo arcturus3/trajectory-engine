@@ -10,6 +10,7 @@
 
 \usepackage[normalem]{ulem}
 \usepackage{algpseudocodex}
+\usepackage{algorithm}
 
 \begin{document}
 
@@ -64,61 +65,89 @@ In addition to trajectory generation, this project also addresses the creation o
 
 \section{Approach}
 
-Initial state fixed by final state of previous segment
-Final position fixed, final acceleration fixed if a rotation constraint exists
-Candidate final velocity vectors searched over to minimize the trajectory’s jerk plus the jerk of the induced trajectory with unconstrained final state
-
-?Like Mceowen’s paper?, should this just be in motivation? This project consists of two main components, which are trajectory generation and the user interface to the trajectory generator. …
-
-In this project, like in the paper by Mceowen et al., trajectories are generated which satisfy user supplied constraints. A constraint in this project is a position in R3 and arrival time which require that the quadrotor is at the specified position at the specified time, and optionally a rotation [NORMAL?] which the quadrotor is required to assume at the specified time. This choice of constraints should allow for the specification of a diverse range of trajectory styles, such as the trajectories found in freestyle flight. For simplicity, constraints describing keep out regions (to avoid obstacles, for example) are not supported. Instead, users can set position constraints as necessary until the generated trajectory does not intersect any of these regions. The sequence of position constraints determines the basic structure or route that the trajectory will take, which could be on the scale of meters or kilometers. Arrival time constraints determine the duration of the flight between constraints, which affects the quadrotor’s speed. Rotation constraints allow for controlling the direction of the quadrotor’s camera and specifying acrobatic maneuvers like inversions. A trajectory for flying along a mountain ridge may only require a simple sequence of position constraints with arrival times set to achieve the desired speed. On the other hand, a trajectory for flying between buildings and other urban obstacles while performing acrobatics could make use of many position constraints to ensure that the generated trajectory closely follows a desired path, as well as rotation constraints to, for example, point downwards while diving alongside a building, keep a sculpture in view while flying around it, or be upside down when at the apex of a loop.
+A constraint in this project is a position in R3 and arrival time which require that the quadrotor is at the specified position at the specified time, and optionally a rotation [NORMAL?] which the quadrotor is required to assume at the specified time. This choice of constraints should allow for the specification of a diverse range of trajectory styles, such as the trajectories found in freestyle flight. For simplicity, constraints describing keep out regions (to avoid obstacles, for example) are not supported. Instead, users can set position constraints as necessary until the generated trajectory does not intersect any of these regions. The sequence of position constraints determines the basic structure or route that the trajectory will take, which could be on the scale of meters or kilometers. Arrival time constraints determine the duration of the flight between constraints, which affects the quadrotor’s speed. Rotation constraints allow for controlling the direction of the quadrotor’s camera and specifying acrobatic maneuvers like inversions. A trajectory for flying along a mountain ridge may only require a simple sequence of position constraints with arrival times set to achieve the desired speed. On the other hand, a trajectory for flying between buildings and other urban obstacles while performing acrobatics could make use of many position constraints to ensure that the generated trajectory closely follows a desired path, as well as rotation constraints to, for example, point downwards while diving alongside a building, keep a sculpture in view while flying around it, or be upside down when at the apex of a loop.
 
 To generate trajectories that respect these constraints, an algorithm is developed that builds on the motion primitive library from Mueller et al. It works by reducing the generation of the full trajectory to generating a sequence of motion primitives with appropriate initial and final constraints using a greedy heuristic. This approach is chosen from among the many options described in the literature because motion primitives are simple and understandable, and the paper provides an easy to use Python implementation for generating them. Additionally, they can be made to work with the constraint model described above without modification to the underlying approach, and their optimization objective of minimal jerk is a good choice for freestyle trajectories. As mentioned previously, trajectories for freestyle flight do not need to be optimal with respect to time or any other easily apparent metric, they need only respect the given constraints. However, to the extent possible, freestyle trajectories should appear relatively smooth and natural, which makes them more enjoyable and engaging to watch. Again, this is not an easy objective to formalize, but one possibility is to minimize some derivative of the quadrotor’s position with respect to time. Because jerk roughly corresponds to the aggressiveness of the inputs to the quadrotor, it is a sensible choice for producing trajectories that look smooth.
 **change pseudocode to end with zero velocity/acceleration?**
 
+\begin{algorithm}
+\caption{Naive}\label{alg:cap}
 \begin{algorithmic}
-\State $i \gets 10$
-\If{$i\geq 5$} 
-    \State $i \gets i-1$
-\Else
-    \If{$i\leq 3$}
-        \State $i \gets i+2$
-    \EndIf
-\EndIf 
+\State $x_{\tau_1}(t_1) \gets x_1$
+\State $\dot x_{\tau_1}(t_1) \gets (0, 0, 0)$
+\State $\ddot x_{\tau_1}(t_1) \gets (0, 0, 0)$
+\State feasible $\gets$ true
+\For{$i \gets 2, \dots, n$}
+  \State $p_0 \gets x_{\tau_{i-1}}(t_{i-1})$
+  \State $v_0 \gets \dot x_{\tau_{i-1}}(t_{i-1})$
+  \State $a_0 \gets \ddot x_{\tau_{i-1}}(t_{i-1})$
+  \State $p_1 \gets x_i$
+  \State $v_1 \gets \text{free}$
+  \State $a_1 \gets \text{free}$
+  \State $t \gets t_i$
+  \State $\tau_i \gets g(p_0, v_0, a_0, p_1, v_1, a_1, t)$
+  \If{$\tau_i = \emptyset$}
+    \State feasible $\gets$ false
+  \EndIf
+\EndFor
 \end{algorithmic}
+\end{algorithm}
 
-Algorithm 1: Naive
-x1(t1)=x1
-x'1(t1)=(0, 0, 0)
-x''1(t1)=(0, 0, 0)
-For i = 2 to n:
-p0=xi-1(ti-1)
-v0=x'i-1(ti-1)
-a0=x''i-1(ti-1)
-p1=xi
-v1=None
-a1=None
-t=ti
-i=g(p0, v0, a0, p1, v1, a1, t)
 If any tau i is None, then infeasible, otherwise return tau by concatenating segments
 
-Algorithm 1 shows pseudocode for a naive approach which is a precursor to the greedy approach discussed later. Note that this algorithm ignores rotation constraints. The algorithm generates trajectory segments (motion primitives) i for every i in {2, 3, …, n}. Segment $\tau_i$ is the trajectory between constraints C{i-1} and C{i}. Lines 1 to 3 set initial conditions so that the first trajectory segment will have an initial position of $x_i$, an initial velocity of $(0, 0, 0)$, and an initial acceleration of $(0, 0, 0)$. The algorithm proceeds by computing $\tau_i$ from $\tau_{i-1}$. P0, v0, and a0 are the initial position, velocity, and acceleration, respectively, of $\tau_i$. For the trajectory to be a continuous function, these must be the final position, velocity, and acceleration, respectively, of $\tau_{i-1}$. P1, v1, and a1 are the final position, velocity, and acceleration of $\tau_i$. The final position for this trajectory segment must be the user supplied position constraint corresponding to the end of the segment, which is $x_i$. The final velocity and acceleration of $\tau_i$ are left unconstrained, which is the defining feature of this naive approach. The duration of this trajectory segment must be the user supplied duration constraint, which is $t_i$. Finally, the trajectory segment $\tau_i$ is generated with the appropriate arguments.
+Algorithm 1 shows pseudocode for a naive approach which is a precursor to the greedy approach discussed later. Note that this algorithm ignores rotation constraints. The algorithm generates trajectory segments (motion primitives) $\tau_i$ for every $i \in \{2, \dots, n\}$. Segment $\tau_i$ is the trajectory between constraints $C_{i-1}$ and $C_i$. Lines 1 to 3 set initial conditions so that the first trajectory segment will have an initial position of $x_i$, an initial velocity of $(0, 0, 0)$, and an initial acceleration of $(0, 0, 0)$. The algorithm proceeds by computing $\tau_i$ from $\tau_{i-1}$. $p_0$, $v_0$, and $a_0$ are the initial position, velocity, and acceleration, respectively, of $\tau_i$. For the trajectory to be a continuous function, these must be the final position, velocity, and acceleration, respectively, of $\tau_{i-1}$. $p_1$, $v_1$, and $a_1$ are the final position, velocity, and acceleration of $\tau_i$. The final position for this trajectory segment must be the user supplied position constraint corresponding to the end of the segment, which is $x_i$. The final velocity and acceleration of $\tau_i$ are left unconstrained, which is the defining feature of this naive approach. The duration of this trajectory segment must be the user supplied duration constraint, which is $t_i$. Finally, the trajectory segment $\tau_i$ is generated with the appropriate arguments.
+
 The naive algorithm produces a trajectory by generating the optimal trajectory segment between position constraints at each step. That is, only the final position of each trajectory segment is fixed; the final velocity and acceleration are free and so they are chosen to minimize the cost of the trajectory segment. This may produce reasonable trajectories for some choices of constraints, but for many it does not, as it does a poor job of globally minimizing the trajectory cost across all segments. For example, consider [FIGURE WITH GREEDY S]. The first trajectory segment simply accelerates in a straight line from the first to the second position constraint. The second trajectory segment must then compensate for the quadrotor’s high velocity away from the third position constraint, but this only exaggerates the problem for the third trajectory segment.
-Algorithm 2: Greedy
+
+\begin{algorithm}
+  \caption{Greedy}\label{alg:cap}
+  \begin{algorithmic}
+  \State $x_{\tau_1}(t_1) \gets x_1$
+  \State $\dot x_{\tau_1}(t_1) \gets (0, 0, 0)$
+  \State $\ddot x_{\tau_1}(t_1) \gets (0, 0, 0)$
+  \State $x_{n+1} \gets x_n$
+  \State $t_{n+1} \gets t_n$
+  \State feasible $\gets$ true
+  \For{$i \gets 2, \dots, n$}
+    \State $\text{best\_cost} \gets \infty$
+    \ForAll{$(\theta, s, f) \in A \times S \times F$}
+
+      \State $p_0 \gets x_{\tau_{i-1}}(t_{i-1})$
+      \State $v_0 \gets \dot x_{\tau_{i-1}}(t_{i-1})$
+      \State $a_0 \gets \ddot x_{\tau_{i-1}}(t_{i-1})$
+      \State $p_1 \gets x_i$
+      \State $v_1 \gets s \cdot d(x_{i-1}, x_i, x_{i+1}, \theta)$
+      \State $a_1 \gets f \cdot R_i(0, 0, 1) + (0, 0, -9.81)$
+      \State $t \gets t_i$
+      \State $\sigma \gets g(p_0, v_0, a_0, p_1, v_1, a_1, t)$
+      \State
+
+      \State $p_0' \gets x_{\sigma}(t_i)$
+      \State $v_0' \gets \dot x_{\sigma}(t_i)$
+      \State $a_0' \gets \ddot x_{\sigma}(t_i)$
+      \State $p_1' \gets x_{i+1}$
+      \State $v_1' \gets \text{free}$
+      \State $a_1' \gets \text{free}$
+      \State $t' \gets t_{i+1}$
+      \State $\sigma' \gets g(p_0', v_0', a_0', p_1', v_1', a_1', t')$
+      \State
+
+      \State $\text{cost} \gets c(\sigma) + c(\sigma')$
+      \If{$\sigma \neq \emptyset$ and $\sigma' \neq \emptyset$ and cost $<$ best\_cost}
+        \State best\_cost $\gets$ cost
+        \State $\tau_i \gets \sigma$
+      \EndIf
+    \EndFor
+    \If{$\tau_i = \emptyset$}
+      \State feasible $\gets$ false
+    \EndIf
+  \EndFor
+  \end{algorithmic}
+  \end{algorithm}
+
 A={0, /8, /4, ..., 2}
 S={0, 0.5, 1, 1.5, ..., 25}
 F={fmin, ..., fmax}
-x1(t1)=x1
-x'1(t1)=(0, 0, 0)
-x''1(t1)=(0, 0, 0)
-For i = 2 to n - 1:
-For (, s, f)ASF:
-v1=sd(xi-1, xi, xi+1, )
-a1=fRi (0, 0, 1)T +(0, 0, -9.81)T if rotation is not None else None
-=g(xi-1(ti-1), x'i-1(ti-1), x''i-1(ti-1), xi, v1, a1, ti)
-=g(x(ti), x'(ti), x''(ti), xi+1, None, None, ti+1)
-If c()+c()<c(i):
-i=
-n=g(xn-1(tn-1), x'n-1(tn-1), x''n-1(tn-1), xn, None, None, tn)
 If any tau i is None, then infeasible, otherwise return tau by concatenating segments
 Define c, d, externally define A, S, F
 Initialize best cost?
@@ -135,7 +164,7 @@ Candidate final velocity vectors searched over to minimize the trajectory’s je
 
 The project is implemented as two separate components, the trajectory engine and the trajectory renderer. The trajectory engine is responsible for generating and querying trajectories using the algorithm described in the approach section. Mueller et al. provided both a Python and C++ implementation of their motion primitive generation library, and I chose to work in Python to maximize iteration speed and understandability. Running time was not a major consideration as the trajectory generation does not need to be realtime, and so the slow execution speed of Python was not a significant downside, although this may become an issue for generating trajectories with many constraints and a large parameter search space. The motion primitive library is included in the project as a Git submodule. The `RapidTrajectory` class represents a motion primitive. It has a number of methods, including those for generation, for retrieving the cost and other properties of the motion primitive, and for querying the quadrotor’s position, velocity, acceleration, and required thrust and body rates at any time along the motion primitive. The engine consists of a `Constraint` class, which simply holds position, rotation, and duration constraint information (note that the implementation uses arrival times instead of durations), and a `Trajectory` class, which contains some constant definitions, methods implementing Algorithms 1 and 2 as described above, and methods to query the quadrotor’s state at any time along the full trajectory by querying the appropriate trajectory segment.
 
-The trajectory renderer is responsible for providing a graphical interface to the user that allows them to define constraints visually, see trajectories generated from these constraints, and watch how a quadrotor would track these trajectories. The renderer is implemented using the Unity game engine, which is one of the most popular platforms for 3D application development. Unity has many features that allow developers to visually edit objects in a scene in addition to controlling them at runtime via C# scripts. To define a trajectory’s constraints, users create instances of `Constraint` objects as children of a `Trajectory` object at edit time. `Constraint` objects display a quadrotor model in the scene, and Unity’s “transform handles” allow the user to move and rotate the constraint in world space with their mouse. An inspector window enables the user to directly set a `Constraint`’s position $x_i$ and rotation $R_i$, as well as set its arrival time $t_i$ and indicate whether the rotation constraint should be enforced. Leveraging the Unity editor for the constraint definition task significantly reduces the number of features that need to be implemented, so this was done to simplify the project. To visualize trajectories, a script communicates with the trajectory engine to generate a trajectory from the user constraints, and the trajectory position values $x_\tau$ are then queried at a small, fixed timestep. The resulting points are rendered as a sequence of line segments using Unity’s built in line renderer component. With a small enough timestep, the trajectory appears as a smooth curve in 3D space showing the path that the quadrotor will take. If the trajectory engine reports that a feasible trajectory cannot be generated from the given constraints, a warning is logged to Unity’s console and the trajectory is not rendered. To see a quadrotor tracking a trajectory, the user must first define constraints and generate the trajectory. An object displaying a quadrotor model is instantiated at the start of the trajectory, and the user can press a button to start tracking. At each frame update call during tracking, a script queries the trajectory engine for $x_\tau(t)$ and $R_\tau(t)$, the quadrotor’s position and rotation along the generated trajectory $\tau$ at the elapsed time since tracking started $t$. Then, the quadrotor object’s position and rotation are updated with the results of the query. Tracking stops after the full duration of the trajectory has elapsed or the user presses a button to stop tracking. The user can either watch the quadrotor from an external and freely movable camera, or from a camera positioned onboard the quadrotor. In addition to the constraints, trajectory, and quadrotor, an environment is also rendered in the scene to give a sense of scale, and to present obstacles and scenery around which the user can construct the trajectory. The environment included in the project is an industrial location, which was free on the Unity asset store [CITATION].
+The trajectory renderer is responsible for providing a graphical interface to the user that allows them to define constraints visually, see trajectories generated from these constraints, and watch how a quadrotor would track these trajectories. The renderer is implemented using the Unity game engine, which is one of the most popular platforms for 3D application development. Unity has many features that allow developers to visually edit objects in a scene in addition to controlling them at runtime via C\# scripts. To define a trajectory’s constraints, users create instances of `Constraint` objects as children of a `Trajectory` object at edit time. `Constraint` objects display a quadrotor model in the scene, and Unity’s “transform handles” allow the user to move and rotate the constraint in world space with their mouse. An inspector window enables the user to directly set a `Constraint`’s position $x_i$ and rotation $R_i$, as well as set its arrival time $t_i$ and indicate whether the rotation constraint should be enforced. Leveraging the Unity editor for the constraint definition task significantly reduces the number of features that need to be implemented, so this was done to simplify the project. To visualize trajectories, a script communicates with the trajectory engine to generate a trajectory from the user constraints, and the trajectory position values $x_\tau$ are then queried at a small, fixed timestep. The resulting points are rendered as a sequence of line segments using Unity’s built in line renderer component. With a small enough timestep, the trajectory appears as a smooth curve in 3D space showing the path that the quadrotor will take. If the trajectory engine reports that a feasible trajectory cannot be generated from the given constraints, a warning is logged to Unity’s console and the trajectory is not rendered. To see a quadrotor tracking a trajectory, the user must first define constraints and generate the trajectory. An object displaying a quadrotor model is instantiated at the start of the trajectory, and the user can press a button to start tracking. At each frame update call during tracking, a script queries the trajectory engine for $x_\tau(t)$ and $R_\tau(t)$, the quadrotor’s position and rotation along the generated trajectory $\tau$ at the elapsed time since tracking started $t$. Then, the quadrotor object’s position and rotation are updated with the results of the query. Tracking stops after the full duration of the trajectory has elapsed or the user presses a button to stop tracking. The user can either watch the quadrotor from an external and freely movable camera, or from a camera positioned onboard the quadrotor. In addition to the constraints, trajectory, and quadrotor, an environment is also rendered in the scene to give a sense of scale, and to present obstacles and scenery around which the user can construct the trajectory. The environment included in the project is an industrial location, which was free on the Unity asset store [CITATION].
 
 The trajectory engine and trajectory renderer communicate over a ZeroMQ socket using TCP. ZeroMQ is a widely used, open source, and high speed messaging library. It is used in this project because it is a simple way to do fast interprocess communication, even though the engine and renderer were run on the same machine for all development and testing. The main requirement for the communication system was that the trajectory renderer be able to query for trajectory information in realtime, as it is tracked by the quadrotor at each frame update, which this system achieves. A request-reply pattern is used, with the engine acting as the server and the renderer acting as the client. A custom message protocol is created, which supports trajectory generation operations and trajectory query operations. Messages are serialized as JSON. The trajectory engine includes a server script to listen for and respond to incoming messages as described above. The trajectory renderer has a `Client` class to handle communication, which includes substantial code for serializing and deserializing messages, as well as converting between the coordinate system used by Unity and the coordinate system used by the motion primitive library and the trajectory engine.
 
