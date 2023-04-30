@@ -11,6 +11,7 @@
 \usepackage[normalem]{ulem}
 \usepackage{algpseudocodex}
 \usepackage{algorithm}
+\usepackage{amsfonts}
 
 \begin{document}
 
@@ -65,9 +66,11 @@ In addition to trajectory generation, this project also addresses the creation o
 
 \section{Approach}
 
-A constraint in this project is a position in R3 and arrival time which require that the quadrotor is at the specified position at the specified time, and optionally a rotation [NORMAL?] which the quadrotor is required to assume at the specified time. This choice of constraints should allow for the specification of a diverse range of trajectory styles, such as the trajectories found in freestyle flight. For simplicity, constraints describing keep out regions (to avoid obstacles, for example) are not supported. Instead, users can set position constraints as necessary until the generated trajectory does not intersect any of these regions. The sequence of position constraints determines the basic structure or route that the trajectory will take, which could be on the scale of meters or kilometers. Arrival time constraints determine the duration of the flight between constraints, which affects the quadrotor’s speed. Rotation constraints allow for controlling the direction of the quadrotor’s camera and specifying acrobatic maneuvers like inversions. A trajectory for flying along a mountain ridge may only require a simple sequence of position constraints with arrival times set to achieve the desired speed. On the other hand, a trajectory for flying between buildings and other urban obstacles while performing acrobatics could make use of many position constraints to ensure that the generated trajectory closely follows a desired path, as well as rotation constraints to, for example, point downwards while diving alongside a building, keep a sculpture in view while flying around it, or be upside down when at the apex of a loop.
+DONE
+In this project, the constraints for a trajectory are given as $C_i = (x_i, R_i, t_i)$ for all $i \in \{1, \dots, n\}$, where $n$ is variable. Constraint $C_i$ requires that the quadrotor is at position $x_i \in \mathbb{R}^3$, $t_i \in \mathbb{R}_{\geq 0}$ seconds after arriving at $x_{i-1}$. That is, $t_i$ is the flight time between $x_{i-1}$ and $x_i$, and $t_1$ is arbitrary as the quadrotor's initial position is assumed to be $x_1$. Optionally, $R_i \in SO(3)$ can be specified, which requires that the quadrotor has rotation matrix $R_i$ at $t_i$. An unconstrained rotation is denoted as $\emptyset$. Note that, due to time constraints, the trajectory generation algorithm ignores rotation about the quadrotor's yaw axis, which is discussed later. This choice of constraints should allow for the specification of a diverse range of trajectory styles, such as the trajectories found in freestyle flight. For simplicity, constraints describing keep out regions (to avoid obstacles, for example) are not supported. Instead, users can set position constraints as necessary until the generated trajectory does not intersect any of these regions. The sequence of position constraints determines the basic structure or route that the trajectory will take, which could be on the scale of meters or kilometers. Duration constraints affect the quadrotor's speed. Rotation constraints allow for controlling the direction of the quadrotor's camera and specifying acrobatic maneuvers like inversions. A trajectory for flying along a mountain ridge may only require a simple sequence of position constraints with arrival times set to achieve the desired speed. On the other hand, a trajectory for flying between buildings and other urban obstacles while performing acrobatics could make use of many position constraints to ensure that the generated trajectory closely follows a desired path, as well as rotation constraints to, for example, point downwards while diving alongside a building, keep a sculpture in view while flying around it, or be upside down when at the apex of a loop.
 
 To generate trajectories that respect these constraints, an algorithm is developed that builds on the motion primitive library from Mueller et al. It works by reducing the generation of the full trajectory to generating a sequence of motion primitives with appropriate initial and final constraints using a greedy heuristic. This approach is chosen from among the many options described in the literature because motion primitives are simple and understandable, and the paper provides an easy to use Python implementation for generating them. Additionally, they can be made to work with the constraint model described above without modification to the underlying approach, and their optimization objective of minimal jerk is a good choice for freestyle trajectories. As mentioned previously, trajectories for freestyle flight do not need to be optimal with respect to time or any other easily apparent metric, they need only respect the given constraints. However, to the extent possible, freestyle trajectories should appear relatively smooth and natural, which makes them more enjoyable and engaging to watch. Again, this is not an easy objective to formalize, but one possibility is to minimize some derivative of the quadrotor’s position with respect to time. Because jerk roughly corresponds to the aggressiveness of the inputs to the quadrotor, it is a sensible choice for producing trajectories that look smooth.
+**yaw rotation** [cite that this is not part of motion primitive]
 **change pseudocode to end with zero velocity/acceleration?**
 
 \begin{algorithm}
@@ -117,7 +120,11 @@ The naive algorithm produces a trajectory by generating the optimal trajectory s
       \State $a_0 \gets \ddot x_{\tau_{i-1}}(t_{i-1})$
       \State $p_1 \gets x_i$
       \State $v_1 \gets s \cdot d(x_{i-1}, x_i, x_{i+1}, \theta)$
-      \State $a_1 \gets f \cdot R_i(0, 0, 1) + (0, 0, -9.81)$
+      \If{$R_i \neq \emptyset$}
+        \State $a_1 \gets f \cdot (0, 0, 1) R_i^\top + (0, 0, -9.81)$
+      \Else
+        \State $a_1 \gets \text{free}$
+      \EndIf
       \State $t \gets t_i$
       \State $\sigma \gets g(p_0, v_0, a_0, p_1, v_1, a_1, t)$
       \State
