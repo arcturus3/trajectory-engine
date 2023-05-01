@@ -18,11 +18,6 @@ Warning--entry type for "model" isn't style-file defined
 --line 81 of file references.bib
 Warning--entry type for "scene" isn't style-file defined
 --line 87 of file references.bib
-Warning--I didn't find a database entry for "lamport94"
-Warning--I didn't find a database entry for "nicepaper"
-Warning--I didn't find a database entry for "nicepaper2"
-Warning--I didn't find a database entry for "Salzberg:2005"
-Warning--I didn't find a database entry for "odoc"
 -- IEEEtranS.bst version 1.13 (2008/09/30) by Michael Shell.
 -- http://www.michaelshell.org/tex/ieeetran/bibtex/
 -- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
@@ -36,7 +31,7 @@ Warning--to sort, need author or key in zmq
 Done.
 You've used 12 entries,
             4498 wiz_defined-function locations,
-            938 strings with 9392 characters,
+            932 strings with 9334 characters,
 and the built_in function-call counts, 5406 in all, are:
 = -- 464
 > -- 129
@@ -75,4 +70,4 @@ warning$ -- 2
 while$ -- 22
 width$ -- 10
 write$ -- 99
-(There were 12 warnings)
+(There were 7 warnings)
