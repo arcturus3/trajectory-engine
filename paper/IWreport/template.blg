@@ -10,55 +10,59 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Database file #1: references.bib
 Warning--entry type for "odoc" isn't style-file defined
 --line 14 of file references.bib
+Warning--entry type for "generator" isn't style-file defined
+--line 105 of file references.bib
+Warning--I didn't find a database entry for "5980409"
 -- IEEEtranS.bst version 1.13 (2008/09/30) by Michael Shell.
 -- http://www.michaelshell.org/tex/ieeetran/bibtex/
 -- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
 ** Sorting version - not for normal IEEE work.
+Warning--to sort, need author or key in generator
 Warning--to sort, need author or key in odoc
 ** IEEEtran BST control entry "bstctl:etal" detected.
 ** IEEEtran BST control entry "bstctl:nodash" detected.
 ** IEEEtran BST control entry "bstctl:simpurl" detected.
 
 Done.
-You've used 8 entries,
+You've used 13 entries,
             4498 wiz_defined-function locations,
-            921 strings with 8546 characters,
-and the built_in function-call counts, 3363 in all, are:
-= -- 261
-> -- 68
-< -- 13
-+ -- 31
-- -- 15
-* -- 170
-:= -- 501
-add.period$ -- 11
-call.type$ -- 8
-change.case$ -- 24
-chr.to.int$ -- 38
-cite$ -- 9
-duplicate$ -- 231
-empty$ -- 332
-format.name$ -- 17
-if$ -- 748
+            948 strings with 9460 characters,
+and the built_in function-call counts, 7257 in all, are:
+= -- 607
+> -- 164
+< -- 39
++ -- 85
+- -- 40
+* -- 359
+:= -- 1076
+add.period$ -- 21
+call.type$ -- 13
+change.case$ -- 55
+chr.to.int$ -- 101
+cite$ -- 15
+duplicate$ -- 484
+empty$ -- 638
+format.name$ -- 46
+if$ -- 1629
 int.to.chr$ -- 0
-int.to.str$ -- 5
-missing$ -- 41
-newline$ -- 40
-num.names$ -- 8
-pop$ -- 124
+int.to.str$ -- 10
+missing$ -- 83
+newline$ -- 57
+num.names$ -- 16
+pop$ -- 249
 preamble$ -- 1
-purify$ -- 17
+purify$ -- 43
 quote$ -- 8
-skip$ -- 268
+skip$ -- 558
 stack$ -- 0
-substring$ -- 98
-swap$ -- 125
-text.length$ -- 2
+substring$ -- 276
+swap$ -- 306
+text.length$ -- 7
 text.prefix$ -- 0
 top$ -- 9
-type$ -- 55
-warning$ -- 1
-while$ -- 15
-width$ -- 6
-write$ -- 63
-(There were 2 warnings)
+type$ -- 109
+warning$ -- 2
+while$ -- 32
+width$ -- 12
+write$ -- 107
+(There were 5 warnings)
