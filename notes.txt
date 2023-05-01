@@ -1,4 +1,8 @@
 results section
+implementation pictures
+rearrange pictures
+fix figure captions
 draft feedback
 repository
 better citations, fix ordering warning
+footnote videos and repo
