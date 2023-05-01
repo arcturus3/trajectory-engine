@@ -221,17 +221,34 @@ Table 1 gives information about the generation of the trajectories shown in Figu
 
 \begin{table}[hbt]
   \centering
-  \begin{tabular}{|l|l|} \hline
-    \textbf{Some field} & \textbf{Another field}\\\hline
-    200          &  10000 \\ \hline 
-    400          &  20000 \\ \hline 
-    800          &  40000 \\ \hline 
-    1600        &  80000 \\ \hline 
-    3200        &  160000 \\ \hline 
-    6400        &  320000 \\ \hline 
+  \begin{tabular}{|l|l|l|l|} \hline
+    $|\textbf{A}|$ & $|\textbf{S}|$ & \textbf{Total cost} & \textbf{Generation time [s]} \\ \hline
+    3 & 25 & 5051 & 0.71 \\ \hline
+    5 & 25 & 5365 & 1.17 \\ \hline
+    25 & 25 & 5866 & 5.54 \\ \hline
+    25 & 1 & 7289 & 0.32 \\ \hline
+    25 & 10 & 6506 & 2.24 \\ \hline
+    25 & 100 & 5663 & 22.23 \\ \hline
   \end{tabular}
   \caption{Some data in a table. }
-  \label{table:data}
+  \label{table:total}
+\end{table}
+
+\begin{table}[hbt]
+  \centering
+  \begin{tabular}{|l|l|l|l|l|} \hline
+    \textbf{Segment} & \textbf{Feasible [\%]} & \textbf{Mean cost} & \textbf{Min cost} & \textbf{Max cost} \\ \hline
+    1 & 91 & 135 & 2 & 753 \\ \hline
+    2 & 99 & 22 & 5 & 71 \\ \hline
+    3 & 79 & 153 & 10 & 820 \\ \hline
+    4 & 52 & 112 & 16 & 421 \\ \hline
+    5 & 29 & 26 & 2 & 127 \\ \hline
+    6 & 26 & 1093 & 14 & 3424 \\ \hline
+    7 & 43 & 158 & 21 & 452 \\ \hline
+    8 & 100 & 46 & 46 & 46 \\ \hline
+  \end{tabular}
+  \caption{Some data in a table. }
+  \label{table:segments}
 \end{table}
 
 \section{Conclusion}
