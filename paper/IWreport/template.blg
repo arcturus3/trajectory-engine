@@ -8,61 +8,71 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Database file #1: references.bib
-Warning--entry type for "odoc" isn't style-file defined
---line 14 of file references.bib
 Warning--entry type for "generator" isn't style-file defined
---line 105 of file references.bib
-Warning--I didn't find a database entry for "5980409"
+--line 65 of file references.bib
+Warning--entry type for "unity" isn't style-file defined
+--line 71 of file references.bib
+Warning--entry type for "zmq" isn't style-file defined
+--line 76 of file references.bib
+Warning--entry type for "model" isn't style-file defined
+--line 81 of file references.bib
+Warning--entry type for "scene" isn't style-file defined
+--line 87 of file references.bib
+Warning--I didn't find a database entry for "lamport94"
+Warning--I didn't find a database entry for "nicepaper"
+Warning--I didn't find a database entry for "nicepaper2"
+Warning--I didn't find a database entry for "Salzberg:2005"
+Warning--I didn't find a database entry for "odoc"
 -- IEEEtranS.bst version 1.13 (2008/09/30) by Michael Shell.
 -- http://www.michaelshell.org/tex/ieeetran/bibtex/
 -- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
 ** Sorting version - not for normal IEEE work.
-Warning--to sort, need author or key in generator
-Warning--to sort, need author or key in odoc
+Warning--to sort, need author or key in unity
+Warning--to sort, need author or key in zmq
 ** IEEEtran BST control entry "bstctl:etal" detected.
 ** IEEEtran BST control entry "bstctl:nodash" detected.
 ** IEEEtran BST control entry "bstctl:simpurl" detected.
 
 Done.
-You've used 13 entries,
+You've used 12 entries,
             4498 wiz_defined-function locations,
-            948 strings with 9460 characters,
-and the built_in function-call counts, 7257 in all, are:
-= -- 607
-> -- 164
-< -- 39
-+ -- 85
-- -- 40
-* -- 359
-:= -- 1076
-add.period$ -- 21
-call.type$ -- 13
-change.case$ -- 55
-chr.to.int$ -- 101
-cite$ -- 15
-duplicate$ -- 484
-empty$ -- 638
-format.name$ -- 46
-if$ -- 1629
+            940 strings with 9356 characters,
+and the built_in function-call counts, 5844 in all, are:
+= -- 497
+> -- 125
+< -- 27
++ -- 66
+- -- 32
+* -- 282
+:= -- 894
+add.period$ -- 18
+call.type$ -- 12
+change.case$ -- 48
+chr.to.int$ -- 68
+cite$ -- 14
+duplicate$ -- 383
+empty$ -- 491
+format.name$ -- 35
+if$ -- 1279
 int.to.chr$ -- 0
-int.to.str$ -- 10
-missing$ -- 83
-newline$ -- 57
-num.names$ -- 16
-pop$ -- 249
+int.to.str$ -- 9
+missing$ -- 72
+newline$ -- 60
+num.names$ -- 14
+pop$ -- 232
 preamble$ -- 1
-purify$ -- 43
+purify$ -- 37
 quote$ -- 8
-skip$ -- 558
+skip$ -- 442
 stack$ -- 0
-substring$ -- 276
-swap$ -- 306
-text.length$ -- 7
+substring$ -- 206
+swap$ -- 235
+text.length$ -- 6
 text.prefix$ -- 0
 top$ -- 9
-type$ -- 109
+type$ -- 104
 warning$ -- 2
-while$ -- 32
-width$ -- 12
-write$ -- 107
-(There were 5 warnings)
+while$ -- 25
+width$ -- 10
+write$ -- 101
+(There were 12 warnings)
