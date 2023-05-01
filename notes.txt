@@ -6,6 +6,8 @@ draft feedback
 repository
 better citations, fix ordering warning
 footnote videos and repo
+make sure to give info on parameter settings
+talk about results elsewhere
 
 
 |S| = 25
@@ -38,51 +40,55 @@ generation time: 22.225621461868286
 
 
 
+
 segment: 1
 feasible proportion: 0.907392
-candidate mean cost: 176.22246053327362
-candidate min cost: 6.664895866339762
-candidate max cost: 809.4386385065252
+candidate mean cost: 135.32515898257344
+candidate min cost: 2.107781503791488
+candidate max cost: 752.57533723591
 
 segment: 2
 feasible proportion: 0.988
-candidate mean cost: 82.26147458882961
-candidate min cost: 6.078771797382731
-candidate max cost: 263.5227013937988
+candidate mean cost: 22.364516377033397
+candidate min cost: 5.044656327990666
+candidate max cost: 70.51283626834908
 
 segment: 3
 feasible proportion: 0.794176
-candidate mean cost: 424.95704652800106
-candidate min cost: 45.69114579490176
-candidate max cost: 1525.7475049513193
+candidate mean cost: 153.4811182821473
+candidate min cost: 10.055091688810382
+candidate max cost: 820.2188340644498
 
 segment: 4
 feasible proportion: 0.5248
-candidate mean cost: 427.58001740651775
-candidate min cost: 19.54948141516399
-candidate max cost: 1698.775838990241
+candidate mean cost: 111.99653679556603
+candidate min cost: 15.99417321315312
+candidate max cost: 420.70138590984686
 
 segment: 5
 feasible proportion: 0.2888
-candidate mean cost: 1384.6899487714204
-candidate min cost: 12.335198152981569
-candidate max cost: 5344.341876953364
+candidate mean cost: 26.394513265559077
+candidate min cost: 2.01696635881688
+candidate max cost: 127.23051297043565
 
 segment: 6
 feasible proportion: 0.2648
-candidate mean cost: 1709.6161599577647
-candidate min cost: 32.34271214260524
-candidate max cost: 5300.746571233952
+candidate mean cost: 1092.6197237527454
+candidate min cost: 13.550193205618722
+candidate max cost: 3424.141473794504
 
 segment: 7
 feasible proportion: 0.432
-candidate mean cost: 639.0207927542879
-candidate min cost: 38.39238779193184
-candidate max cost: 2509.464490492318
+candidate mean cost: 157.73806000987497
+candidate min cost: 20.98759466047386
+candidate max cost: 451.7302861735717
 
 segment: 8
 feasible proportion: 1.0
+candidate mean cost: 45.52277542687378
+candidate min cost: 45.52277542687378
+candidate max cost: 45.52277542687378
 
 feasible: True
 cost: 168.19042804912092
-generation time: 55.610376834869385
+generation time: 57.665146350860596

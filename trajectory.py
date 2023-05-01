@@ -137,7 +137,7 @@ class Trajectory:
                                     best_segment = segment
                                     best_cost = cost
                                 feasible_count += 1
-                                all_costs.append(cost)
+                                all_costs.append(segment.get_cost())
                             total_count += 1
                 segment = best_segment
             else:
@@ -148,6 +148,7 @@ class Trajectory:
                 else:
                     feasible_count += 1
                 total_count += 1
+                all_costs.append(segment.get_cost())
             if segment is None:
                 self.segments = []
                 return False
