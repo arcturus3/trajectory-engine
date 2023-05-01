@@ -6,3 +6,83 @@ draft feedback
 repository
 better citations, fix ordering warning
 footnote videos and repo
+
+
+|S| = 25
+|A| = 3
+feasible: True
+cost: 5050.948553515002
+generation time: 0.7121295928955078
+|A| = 5
+feasible: True
+cost: 5365.408457765713
+generation time: 1.170543909072876
+|A| = 25
+feasible: True
+cost: 5865.902700244612
+generation time: 5.539844512939453
+
+|A| = 25
+|S| = 1
+feasible: True
+cost: 7289.285627934457
+generation time: 0.31897401809692383
+|S| = 10
+feasible: True
+cost: 6505.569219489243
+generation time: 2.236629009246826
+|S| = 100
+feasible: True
+cost: 5663.299487958843
+generation time: 22.225621461868286
+
+
+
+segment: 1
+feasible proportion: 0.907392
+candidate mean cost: 176.22246053327362
+candidate min cost: 6.664895866339762
+candidate max cost: 809.4386385065252
+
+segment: 2
+feasible proportion: 0.988
+candidate mean cost: 82.26147458882961
+candidate min cost: 6.078771797382731
+candidate max cost: 263.5227013937988
+
+segment: 3
+feasible proportion: 0.794176
+candidate mean cost: 424.95704652800106
+candidate min cost: 45.69114579490176
+candidate max cost: 1525.7475049513193
+
+segment: 4
+feasible proportion: 0.5248
+candidate mean cost: 427.58001740651775
+candidate min cost: 19.54948141516399
+candidate max cost: 1698.775838990241
+
+segment: 5
+feasible proportion: 0.2888
+candidate mean cost: 1384.6899487714204
+candidate min cost: 12.335198152981569
+candidate max cost: 5344.341876953364
+
+segment: 6
+feasible proportion: 0.2648
+candidate mean cost: 1709.6161599577647
+candidate min cost: 32.34271214260524
+candidate max cost: 5300.746571233952
+
+segment: 7
+feasible proportion: 0.432
+candidate mean cost: 639.0207927542879
+candidate min cost: 38.39238779193184
+candidate max cost: 2509.464490492318
+
+segment: 8
+feasible proportion: 1.0
+
+feasible: True
+cost: 168.19042804912092
+generation time: 55.610376834869385

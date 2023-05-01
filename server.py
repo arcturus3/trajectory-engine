@@ -2,6 +2,7 @@ import zmq
 import numpy as np
 import traceback
 from trajectory import Trajectory, Constraint
+import time
 
 def generate(message):
     waypoints = message['waypoints']
@@ -10,12 +11,18 @@ def generate(message):
         position = np.array(waypoint['position'])
         constrain_rotation = waypoint['constrain_rotation']
         rotation = np.array(waypoint['rotation']) if constrain_rotation else None
-        time = waypoint['time']
-        constraint = Constraint(position, rotation, time)
+        arrival_time = waypoint['time']
+        constraint = Constraint(position, rotation, arrival_time)
         constraints.append(constraint)
     trajectory = Trajectory(constraints)
-    feasible = trajectory.generate_naive()
-    # feasible = trajectory.generate_greedy_with_rotation()
+    start_time = time.time()
+    # feasible = trajectory.generate_naive()
+    feasible = trajectory.generate_greedy_with_rotation()
+    end_time = time.time()
+    print('feasible:', feasible)
+    if feasible:
+        print('cost:', trajectory.get_cost())
+        print('generation time:', end_time - start_time)
     trajectory_id = len(trajectories)
     trajectories.append(trajectory)
     return {

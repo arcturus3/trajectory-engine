@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 from RapidQuadrocopterTrajectories.Python.quadrocoptertrajectory import RapidTrajectory as TrajectorySegment, InputFeasibilityResult
+import statistics
 
 # minimize total acceleration
 # define constraint durations instead of times
@@ -104,6 +105,9 @@ class Trajectory:
         v0 = np.zeros(3)
         a0 = np.zeros(3) # either enforce initial and final accelerations to be 0 or allow rotation to take effect with minimum thrust here
         for i in range(1, len(self.constraints)):
+            feasible_count = 0
+            total_count = 0
+            all_costs = []
             p1 = self.constraints[i].position
             a1 = np.full(3, None)
             duration = self.constraints[i].time - self.constraints[i - 1].time
@@ -132,12 +136,18 @@ class Trajectory:
                                 if cost < best_cost:
                                     best_segment = segment
                                     best_cost = cost
+                                feasible_count += 1
+                                all_costs.append(cost)
+                            total_count += 1
                 segment = best_segment
             else:
                 v1 = np.zeros(3)
                 segment, segment_feasible = self.generate_segment(p0, v0, a0, p1, v1, a1, duration)
                 if not segment_feasible:
                     segment = None
+                else:
+                    feasible_count += 1
+                total_count += 1
             if segment is None:
                 self.segments = []
                 return False
@@ -145,6 +155,14 @@ class Trajectory:
             p0 = segment.get_position(duration)
             v0 = segment.get_velocity(duration)
             a0 = segment.get_acceleration(duration)
+
+            print('segment:', i)
+            print('feasible proportion:', feasible_count / total_count)
+            if len(all_costs) > 0:
+                print('candidate mean cost:', statistics.mean(all_costs))
+                print('candidate min cost:', min(all_costs))
+                print('candidate max cost:', max(all_costs))
+            print()
         return True
 
     def generate_segment(
@@ -171,7 +189,7 @@ class Trajectory:
 
     def get_thrusts(self):
         # return max of this and some small epsilon to ensure that quad is thrusting some amount
-        return np.linspace(self.f_min, self.f_max, 30)
+        return np.linspace(self.f_min, self.f_max, 25)
 
     # direction set to optimize over
     def get_directions(self, p0: np.ndarray, p1: np.ndarray, p2: np.ndarray):
@@ -206,3 +224,6 @@ class Trajectory:
     def get_normal(self, time: float):
         segment, segment_time = self.get_segment_time(time)
         return segment.get_normal_vector(segment_time)
+
+    def get_cost(self):
+        return sum(segment.get_cost() for segment in self.segments)
