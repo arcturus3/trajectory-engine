@@ -1,6 +1,5 @@
-implementation pictures
-rearrange pictures
-fix figure captions
+captions
+figure layout
 
 draft feedback
 repository
