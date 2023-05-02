@@ -92,7 +92,7 @@ Algorithm \ref{alg:naive} shows pseudocode for a naive approach to trajectory ge
 
 The naive algorithm produces a trajectory by generating the optimal trajectory segment between position constraints at each step. That is, only the final position of each trajectory segment is fixed; the final velocity and acceleration are free and so they are chosen to minimize the cost of the trajectory segment. This may produce reasonable trajectories for some choices of constraints, but for many it does not since each segment is optimized completely independently of the following segments. For example, consider Figure \ref{fig:naive}. The first trajectory segment simply accelerates in a straight line from the first to the second position constraint. The second trajectory segment must then compensate for the quadrotor's high velocity away from the third position constraint, but this only exaggerates the problem for the third trajectory segment. The greedy algorithm introduced below solves issues with the naive algorithm like this one, and also produces trajectories that respect rotation constraints.
 
-\begin{figure}[hbt]
+\begin{figure}
   \includegraphics[width=\linewidth]{data/naive.png}
   \caption{A trajectory generated using the naive algorithm. The red quadrotors are constraints, and the white curve is the trajectory. The first constraint is the one nearest to the bottom of the image.}
   \label{fig:naive}
@@ -157,7 +157,7 @@ Intuitively, this algorithm considers the cost of the induced trajectory segment
 
 The project is implemented as two separate components, the trajectory engine \footnote{https://github.com/arcturus3/trajectory-engine} and the trajectory renderer \footnote{https://github.com/arcturus3/trajectory}. The trajectory engine is responsible for generating and querying trajectories using the algorithm described in the approach section. Mueller et al. provided both a Python and C++ implementation of their motion primitive generation library, and I chose to work in Python to maximize iteration speed and understandability. Running time was not a major consideration as the trajectory generation does not need to be realtime, and so the slow execution speed of Python was not a significant downside, although this may become an issue for generating trajectories with many constraints and a large parameter search space. The motion primitive library is included in the project as a Git submodule. The \texttt{RapidTrajectory} class represents a motion primitive. It has a number of methods, including those for generation, for retrieving the cost and other properties of the motion primitive, and for querying the quadrotor's position, velocity, acceleration, and required thrust and body rates at any time along the motion primitive. The engine consists of a \texttt{Constraint} class, which simply holds position, rotation, and duration constraint information (note that the implementation uses cumulative arrival times instead of durations), and a \texttt{Trajectory} class, which contains some constant definitions, methods implementing Algorithms \ref{alg:naive} and \ref{alg:greedy} as described above, and methods to query the quadrotor's state at any time along the full trajectory by querying the appropriate trajectory segment.
 
-\begin{figure}[hbt]
+\begin{figure}
   \includegraphics[width=\linewidth]{data/constraint.png}
   \caption{A \texttt{Constraint} object in the trajectory renderer. The quadrotor model has the position and rotation specified in the constraint to visualize it in 3D. This particular constraint does enforce the rotation constraint, but others may not. The white curve shows the path taken by the trajectory.}
   \label{fig:constraint}
@@ -169,41 +169,45 @@ The trajectory engine and trajectory renderer communicate over a ZeroMQ socket u
 
 \section{Results}
 
-\begin{figure}[hbt]
-  \includegraphics[width=\linewidth]{data/overview.png}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.75\linewidth]{data/overview.png}
   \caption{A complex trajectory generated using the greedy algorithm. White quadrotors represent constraints, although they are hard to see from this perspective, and the white curve is the trajectory. The first constraint is the one nearest to the bottom of the image.}
   \label{fig:overview}
 \end{figure}
 
-\begin{figure}[hbt]
-  \includegraphics[width=\linewidth]{data/landing.png}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.75\linewidth]{data/landing.png}
   \caption{A close up view of the end of the same trajectory shown in Figure \ref{fig:overview}. This angle clearly shows the complexity of the trajectory, including its change in altitude.}
   \label{fig:landing}
 \end{figure}
 
 The approach described in Algorithm \ref{alg:greedy} is able to produce a wide variety of qualitatively interesting and visually appealing trajectories. Figure \ref{fig:overview} shows a trajectory generated from nine constraints. The total flight time is \qty{25}{s}, and the duration between constraints varies so that the quadrotor flies quickly through some sections and slowly through others. Unless noted otherwise, all trajectories were generated with parameters $|A| = 25$, $|S| = 50$, $|F| = 25$, $f_{\min} = 0$, $f_{\max} = 35$, $\omega_{\max} = 20$, and $v_{\max} = 25$. As mentioned previously, the generation algorithm does not account for obstacles in the environment, so the industrial scene just provides context and realism for the designer of the trajectory. For this trajectory, constraints were strategically placed so that it passed under the elevated pipe instead of intersecting it, for example. The trajectory is dynamic and winding, but still looks quite smooth and natural to fly, which is even more apparent when watching a quadrotor track the trajectory in a video \footnote{See video: https://drive.google.com/file/d/1GGhvepiOKyQiuS-Q-V\_gDFPm69WN65nc/view?usp=sharing}. Figure \ref{fig:landing} shows a close up view of the end of the trajectory, and emphasizes its significant change in altitude \footnote{See video: https://drive.google.com/file/d/1Aqa7HTNLoc\_kI60YJ14a9MxLAHAoN2XD/view?usp=sharing}.
 
-\begin{figure}[hbt]
-  \includegraphics[width=\linewidth]{data/onboard.png}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.75\linewidth]{data/onboard.png}
   \caption{A frame of a video taken from a camera onboard a quadrotor while tracking the trajectory shown in Figure \ref{fig:overview}. At this point in the trajectory the quadrotor is in the vicinity of a constraint which fixes its rotation. To respect this constraint, the quadrotor is noticeably rolled to the right.}
   \label{fig:onboard}
 \end{figure}
 
-\begin{figure}[hbt]
-  \includegraphics[width=\linewidth]{data/rotation.png}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.75\linewidth]{data/rotation.png}
   \caption{There are two quadrotors shown in the foreground of this frame. The left quadrotor is a constraint with rotation enforced. The right quadrotor with a faint blue outline is tracking the trajectory, and has just passed the constraint. It is pitched back substantially, which reflects the pitch angle of the constraint as expected. This is part of the same trajectory shown in Figure \ref{fig:overview}.}
   \label{fig:rotation}
 \end{figure}
 
 Two of the constraints shown in Figure \ref{fig:overview} fix the quadrotor's rotation, and the left leave it unconstrained. The first of these is the second constraint, featured in Figure \ref{fig:constraint}, which requires that the quadrotor has a pitch of \qty{0}{deg} and a roll of \qty{20}{deg} to the right. Figure \ref{fig:onboard} is a frame taken from a video of a quadrotor tracking the trajectory, from the perspective of a camera onboard the quadrotor \footnote{See video: https://drive.google.com/file/d/1Q52Q4-DGpkiKXSAfPmdqt95fDZHyswE8/view?usp=sharing}. The frame is taken when the quadrotor is in the vicinity of this second constraint, and it is apparent that the trajectory respects the roll angle constraint here. The second constraint that enforces the quadrotor's rotation is after the quadrotor passes under the elevated pipe, and is pictured in Figure \ref{fig:rotation}. Although it is difficult to discern because of the background, there are two quadrotor models shown in the foreground of this figure. The one to the left is the constraint in question, and the one to the right with a faint blue outline is the quadrotor just after passing through this constraint. The constraint requires the quadrotor to pitch back significantly, and the figure confirms that the quadrotor does assume the correct rotation at the constraint \footnote{See video: https://drive.google.com/file/d/1RPgdxUxGlWry4A1bbcxrVOgbvc1ThxMU/view?usp=sharing}.
 
-\begin{figure}[htbb]
-  \begin{minipage}[b]{0.5\linewidth}
+\begin{figure}
+  \begin{minipage}{0.5\linewidth}
     \includegraphics[width=\linewidth]{data/3angles_25speeds.png}
     \includegraphics[width=\linewidth]{data/5angles_25speeds.png}
     \includegraphics[width=\linewidth]{data/25angles_25speeds.png}
   \end{minipage}
-  \begin{minipage}[b]{0.5\linewidth}
+  \begin{minipage}{0.5\linewidth}
     \includegraphics[width=\linewidth]{data/1speed_25angles.png}
     \includegraphics[width=\linewidth]{data/10speeds_25angles.png}
     \includegraphics[width=\linewidth]{data/100speeds_25angles.png}
@@ -214,7 +218,7 @@ Two of the constraints shown in Figure \ref{fig:overview} fix the quadrotor's ro
 
 Figure \ref{fig:greedy} shows results for generating a simple, four constraint trajectory with unconstrained rotation using Algorithm \ref{alg:greedy} with varying parameters. Note that these are the same constraints as in Figure \ref{fig:naive}, which shows a trajectory generated using Algorithm \ref{alg:naive}. The two figures suggest that Algorithm \ref{alg:greedy} performs much better, as the trajectories it generates take an intuitive route through the constraints, whereas the trajectory generated by Algorithm \ref{alg:naive} appears to have excessively long tails after each segment for the quadrotor to decelerate. In Figure \ref{fig:greedy}, the left column shows results for generating with a fixed speed set $S$ and an increasingly large direction set $A$ (from top to bottom), and the right column shows results for generating with a fixed direction set $A$ and an increasingly large speed set $S$ (from top to bottom). As expected, the trajectories generated with larger $A$ and $S$ appear smoother. While the effect of $S$ is clear, the effect of $A$ is demonstrated well by the top left image, where the trajectory visibly compensates for the lack of velocity vectors to choose from. The algorithm appears to be more sensitive to $S$ than $A$, but it should be noted that the choice of $v_{\max}$ could significantly impact this, which is $v_{\max} = 25$ in these tests. $v_{\max}$ influences the granularity of speeds in $S$, since the implementation chooses linearly spaced values in $[0, v_{\max}]$.
 
-\begin{table}[hbt]
+\begin{table}
   \centering
   \begin{tabular}{|l|l|l|l|} \hline
     $|\textbf{A}|$ & $|\textbf{S}|$ & \textbf{Total cost} & \textbf{Generation time [s]} \\ \hline
@@ -229,7 +233,7 @@ Figure \ref{fig:greedy} shows results for generating a simple, four constraint t
   \label{table:total}
 \end{table}
 
-\begin{table}[hbt]
+\begin{table}
   \centering
   \begin{tabular}{|l|l|l|l|l|} \hline
     \textbf{Segment} & \textbf{Feasible [\%]} & \textbf{Mean cost} & \textbf{Min cost} & \textbf{Max cost} \\ \hline
