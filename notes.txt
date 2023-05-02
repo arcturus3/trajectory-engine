@@ -1,6 +1,4 @@
-captions
 figure layout
-acknowledgements
 
 draft feedback
 repository
