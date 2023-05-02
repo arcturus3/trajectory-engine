@@ -1403,6 +1403,9 @@ INPUT ./data/constraint.png
 INPUT data/constraint.png
 INPUT ./data/constraint.png
 INPUT ./data/constraint.png
+INPUT /usr/local/texlive/2023/texmf-dist/fonts/tfm/adobe/courier/pcrb8t.tfm
+INPUT /usr/local/texlive/2023/texmf-dist/fonts/vf/adobe/courier/pcrb8t.vf
+INPUT /usr/local/texlive/2023/texmf-dist/fonts/tfm/adobe/courier/pcrb8r.tfm
 INPUT ./data/overview.png
 INPUT ./data/overview.png
 INPUT data/overview.png
@@ -1470,6 +1473,7 @@ INPUT /usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.p
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb
+INPUT /usr/local/texlive/2023/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/type1/urw/symbol/usyr.pfb

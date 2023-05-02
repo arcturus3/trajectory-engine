@@ -159,7 +159,7 @@ The project is implemented as two separate components, the trajectory engine \fo
 
 \begin{figure}[hbt]
   \includegraphics[width=\linewidth]{data/constraint.png}
-  \caption{A trajectory generated using the naive algorithm. The red quadrotors are constraints, and the white curve is the trajectory. The first constraint is the one nearest to the bottom of the image.}
+  \caption{A \texttt{Constraint} object in the trajectory renderer. The quadrotor model has the position and rotation specified in the constraint to visualize it in 3D. This particular constraint does enforce the rotation constraint, but others may not. The white curve shows the path taken by the trajectory.}
   \label{fig:constraint}
 \end{figure}
 
@@ -171,13 +171,13 @@ The trajectory engine and trajectory renderer communicate over a ZeroMQ socket u
 
 \begin{figure}[hbt]
   \includegraphics[width=\linewidth]{data/overview.png}
-  \caption{A trajectory generated using the naive algorithm. The red quadrotors are constraints, and the white curve is the trajectory. The first constraint is the one nearest to the bottom of the image.}
+  \caption{A complex trajectory generated using the greedy algorithm. White quadrotors represent constraints, although they are hard to see from this perspective, and the white curve is the trajectory. The first constraint is the one nearest to the bottom of the image.}
   \label{fig:overview}
 \end{figure}
 
 \begin{figure}[hbt]
   \includegraphics[width=\linewidth]{data/landing.png}
-  \caption{A trajectory generated using the naive algorithm. The red quadrotors are constraints, and the white curve is the trajectory. The first constraint is the one nearest to the bottom of the image.}
+  \caption{A close up view of the end of the same trajectory shown in Figure \ref{fig:overview}. This angle clearly shows the complexity of the trajectory, including its change in altitude.}
   \label{fig:landing}
 \end{figure}
 
@@ -185,13 +185,13 @@ The approach described in Algorithm \ref{alg:greedy} is able to produce a wide v
 
 \begin{figure}[hbt]
   \includegraphics[width=\linewidth]{data/onboard.png}
-  \caption{A trajectory generated using the naive algorithm. The red quadrotors are constraints, and the white curve is the trajectory. The first constraint is the one nearest to the bottom of the image.}
+  \caption{A frame of a video taken from a camera onboard a quadrotor while tracking the trajectory shown in Figure \ref{fig:overview}. At this point in the trajectory the quadrotor is in the vicinity of a constraint which fixes its rotation. To respect this constraint, the quadrotor is noticeably rolled to the right.}
   \label{fig:onboard}
 \end{figure}
 
 \begin{figure}[hbt]
   \includegraphics[width=\linewidth]{data/rotation.png}
-  \caption{A trajectory generated using the naive algorithm. The red quadrotors are constraints, and the white curve is the trajectory. The first constraint is the one nearest to the bottom of the image.}
+  \caption{There are two quadrotors shown in the foreground of this frame. The left quadrotor is a constraint with rotation enforced. The right quadrotor with a faint blue outline is tracking the trajectory, and has just passed the constraint. It is pitched back substantially, which reflects the pitch angle of the constraint as expected. This is part of the same trajectory shown in Figure \ref{fig:overview}.}
   \label{fig:rotation}
 \end{figure}
 
@@ -208,7 +208,7 @@ Two of the constraints shown in Figure \ref{fig:overview} fix the quadrotor's ro
     \includegraphics[width=\linewidth]{data/10speeds_25angles.png}
     \includegraphics[width=\linewidth]{data/100speeds_25angles.png}
   \end{minipage}
-  \caption{testing}
+  \caption{Six different trajectories generated from the same four constraints (in red) with unconstrained rotation, using Algorithm \ref{alg:greedy}. They are generated using different direction sets $A$ and speed sets $S$. $A$ and $S$ contain linearly spaced values in the intervals $[0, 2\pi)$ and $[0, v_{\max} = 25]$, respectively. In the first column, from top to bottom, $(|A|, |S|)$ is $(3, 25)$, $(5, 25)$, and $(25, 25)$. In the second column, from top to bottom, $(|A|, |S|)$ is $(25, 1)$, $(25, 10)$, and $(25, 100)$.}
   \label{fig:greedy}
 \end{figure}
 
@@ -225,7 +225,7 @@ Figure \ref{fig:greedy} shows results for generating a simple, four constraint t
     25 & 10 & 6506 & 2.24 \\ \hline
     25 & 100 & 5663 & 22.23 \\ \hline
   \end{tabular}
-  \caption{Some data in a table. }
+  \caption{This table gives the total trajectory cost, rounded to an integer, and generation time for each of the trajectories shown in Figure \ref{fig:greedy}. $|A|$ and $|S|$ are the sizes of the direction set and speed set, respectively.}
   \label{table:total}
 \end{table}
 
@@ -242,7 +242,7 @@ Figure \ref{fig:greedy} shows results for generating a simple, four constraint t
     7 & 43 & 158 & 21 & 452 \\ \hline
     8 & 100 & 46 & 46 & 46 \\ \hline
   \end{tabular}
-  \caption{The total generation time for this trajectory was \qty{57.67}{s}.}
+  \caption{This table gives statistics related to the generation of the trajectory shown in Figure \ref{fig:overview}. For each trajectory segment, the percentage of motion primitive candidates which are feasible is given, along with the mean, minimum, and maximum cost among the feasible candidates, rounded to an integer. These cost values are the cost of the current segment; they do not include the cost of the induced trajectory. The total generation time for this trajectory was 57.67 s.}
   \label{table:segments}
 \end{table}
 
