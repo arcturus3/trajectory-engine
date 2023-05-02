@@ -4,10 +4,6 @@ figure layout
 draft feedback
 repository
 
-make sure to give info on parameter settings
-talk about results elsewhere
-big traj generation time: 57.665146350860596
-
 
 |S| = 25
 |A| = 3

@@ -181,7 +181,7 @@ The trajectory engine and trajectory renderer communicate over a ZeroMQ socket u
   \label{fig:landing}
 \end{figure}
 
-The approach described in Algorithm \ref{alg:greedy} is able to produce a wide variety of qualitatively interesting and visually appealing trajectories. Figure \ref{fig:overview} shows a trajectory generated from nine constraints. The total flight time is \qty{25}{s}, and the duration between constraints varies so that the quadrotor flies quickly through some sections and slowly through others. As mentioned previously, the generation algorithm does not account for obstacles in the environment, so the industrial scene just provides context and realism for the designer of the trajectory. For this trajectory, constraints were strategically placed so that it passed under the elevated pipe instead of intersecting it, for example. The trajectory is dynamic and winding, but still looks quite smooth and natural to fly, which is even more apparent when watching a quadrotor track the trajectory in a video \footnote{See video: https://drive.google.com/file/d/1GGhvepiOKyQiuS-Q-V\_gDFPm69WN65nc/view?usp=sharing}. Figure \ref{fig:landing} shows a close up view of the end of the trajectory, and emphasizes its significant change in altitude \footnote{See video: https://drive.google.com/file/d/1Aqa7HTNLoc\_kI60YJ14a9MxLAHAoN2XD/view?usp=sharing}.
+The approach described in Algorithm \ref{alg:greedy} is able to produce a wide variety of qualitatively interesting and visually appealing trajectories. Figure \ref{fig:overview} shows a trajectory generated from nine constraints. The total flight time is \qty{25}{s}, and the duration between constraints varies so that the quadrotor flies quickly through some sections and slowly through others. Unless noted otherwise, all trajectories were generated with parameters $|A| = 25$, $|S| = 50$, $|F| = 25$, $f_{\min} = 0$, $f_{\max} = 35$, $\omega_{\max} = 20$, and $v_{\max} = 25$. As mentioned previously, the generation algorithm does not account for obstacles in the environment, so the industrial scene just provides context and realism for the designer of the trajectory. For this trajectory, constraints were strategically placed so that it passed under the elevated pipe instead of intersecting it, for example. The trajectory is dynamic and winding, but still looks quite smooth and natural to fly, which is even more apparent when watching a quadrotor track the trajectory in a video \footnote{See video: https://drive.google.com/file/d/1GGhvepiOKyQiuS-Q-V\_gDFPm69WN65nc/view?usp=sharing}. Figure \ref{fig:landing} shows a close up view of the end of the trajectory, and emphasizes its significant change in altitude \footnote{See video: https://drive.google.com/file/d/1Aqa7HTNLoc\_kI60YJ14a9MxLAHAoN2XD/view?usp=sharing}.
 
 \begin{figure}[hbt]
   \includegraphics[width=\linewidth]{data/onboard.png}
@@ -242,7 +242,7 @@ Figure \ref{fig:greedy} shows results for generating a simple, four constraint t
     7 & 43 & 158 & 21 & 452 \\ \hline
     8 & 100 & 46 & 46 & 46 \\ \hline
   \end{tabular}
-  \caption{Some data in a table. }
+  \caption{The total generation time for this trajectory was \qty{57.67}{s}.}
   \label{table:segments}
 \end{table}
 
